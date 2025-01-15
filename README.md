@@ -15,11 +15,11 @@ Regulated Pure Pursuit Controller for ROS. Applicable for both [move_base](http:
 * See its [Configuration Guide Page](https://docs.nav2.org/configuration/packages/configuring-regulated-pp.html)
 
 # Demo
-TODO
+https://github.com/user-attachments/assets/ad69bfca-6a1c-4576-814b-242fe073b841
 
 # Reference
 - [nav2_regulated_pure_pursuit_controller](https://github.com/ros-navigation/navigation2/tree/main/nav2_regulated_pure_pursuit_controller)
-
+- [regulated_pure_pursuit_controller](https://github.com/JohnTGZ/regulated_pure_pursuit_controller)
 - S. Macenski, S. Singh, F. Martin, J. Gines, [**Regulated Pure Pursuit for Robot Path Tracking**](https://arxiv.org/abs/2305.20026). Autonomous Robots, 2023.
 
 ```bibtex
