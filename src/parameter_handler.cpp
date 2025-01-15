@@ -1,0 +1,66 @@
+#include <algorithm>
+#include <string>
+#include <limits>
+#include <memory>
+#include <vector>
+#include <utility>
+
+#include "regulated_pure_pursuit_controller/parameter_handler.hpp"
+
+namespace regulated_pure_pursuit_controller
+{
+
+ParameterHandler::ParameterHandler(
+  std::shared_ptr<ros::NodeHandle> node, std::shared_ptr<ros::NodeHandle> private_node,
+  const double costmap_size_x)
+{
+  node_ = node;
+  private_node_ = private_node;
+
+  private_node_->param<double>("desired_linear_vel", params_.desired_linear_vel, 0.5);
+  private_node_->param<double>("lookahead_dist", params_.lookahead_dist, 0.8);
+  private_node_->param<double>("rotate_to_heading_angular_vel", params_.rotate_to_heading_angular_vel, 0.5);
+  private_node_->param<double>("max_lookahead_dist", params_.max_lookahead_dist, 1.0);
+  private_node_->param<double>("min_lookahead_dist", params_.min_lookahead_dist, 0.5);
+  private_node_->param<double>("lookahead_time", params_.lookahead_time, 4.0);
+  private_node_->param<bool>("use_velocity_scaled_lookahead_dist", params_.use_velocity_scaled_lookahead_dist, true);
+  private_node_->param<double>("min_approach_linear_velocity", params_.min_approach_linear_velocity, 0.1);
+  private_node_->param<double>("approach_velocity_scaling_dist", params_.approach_velocity_scaling_dist, 0.5);
+  
+  if (params_.approach_velocity_scaling_dist > costmap_size_x / 2.0) {
+    ROS_WARN("[RPP] approach_velocity_scaling_dist is larger than forward costmap extent, "
+      "leading to permanent slowdown");
+  }
+
+  private_node_->param<double>("max_allowed_time_to_collision_up_to_carrot", params_.max_allowed_time_to_collision_up_to_carrot, 2.0);
+  private_node_->param<bool>("use_regulated_linear_velocity_scaling", params_.use_regulated_linear_velocity_scaling, false);
+  private_node_->param<bool>("use_cost_regulated_linear_velocity_scaling", params_.use_cost_regulated_linear_velocity_scaling, false);
+  private_node_->param<double>("cost_scaling_dist", params_.cost_scaling_dist, 0.5);
+  private_node_->param<double>("cost_scaling_gain", params_.cost_scaling_gain, 1.0);
+  private_node_->param<double>("inflation_cost_scaling_factor", params_.inflation_cost_scaling_factor, 0.0);
+  private_node_->param<double>("regulated_linear_scaling_min_radius", params_.regulated_linear_scaling_min_radius, 0.5);
+  private_node_->param<double>("regulated_linear_scaling_min_speed", params_.regulated_linear_scaling_min_speed, 0.1);
+  private_node_->param<bool>("use_fixed_curvature_lookahead", params_.use_fixed_curvature_lookahead, false);
+  private_node_->param<double>("curvature_lookahead_dist", params_.curvature_lookahead_dist, 0.5);
+  private_node_->param<bool>("use_rotate_to_heading", params_.use_rotate_to_heading, false);
+  private_node_->param<double>("max_angular_accel", params_.max_angular_accel, 0.5);
+  private_node_->param<double>("rotate_to_heading_min_angle", params_.rotate_to_heading_min_angle, 0.1);
+  private_node_->param<bool>("allow_reversing", params_.allow_reversing, false);
+  private_node_->param<double>("max_robot_pose_search_dist", params_.max_robot_pose_search_dist, 1.0);
+  private_node_->param<bool>("interpolate_curvature_after_goal", params_.interpolate_curvature_after_goal, false);
+  private_node_->param<bool>("use_collision_detection", params_.use_collision_detection, false);
+  private_node_->param<double>("transform_tolerance", params_.transform_tolerance, 0.1);
+  private_node_->param<double>("goal_dist_tol", params_.goal_dist_tol, 0.2);
+  private_node_->param<double>("angle_tol", params_.angle_tol, 0.1);
+  private_node_->param<double>("max_linear_vel", params_.max_linear_vel, 0.5);
+  private_node_->param<double>("max_angular_vel", params_.max_angular_vel, 0.5);
+  private_node_->param<double>("theta_stopped_vel", params_.theta_stopped_vel, 0.1);
+  private_node_->param<double>("trans_stopped_vel",params_.trans_stopped_vel, 0.1);
+}
+
+ParameterHandler::~ParameterHandler()
+{
+
+}
+
+}  // namespace regulated_pure_pursuit_controller
