@@ -56,6 +56,9 @@ ParameterHandler::ParameterHandler(
   private_node_->param<double>("max_angular_vel", params_.max_angular_vel, 0.5);
   private_node_->param<double>("theta_stopped_vel", params_.theta_stopped_vel, 0.1);
   private_node_->param<double>("trans_stopped_vel",params_.trans_stopped_vel, 0.1);
+  private_node_->param<double>("k", params_.k, 5.0);
+  private_node_->param<double>("min_turning_radius", params_.min_turning_radius, 0.25);
+  private_node_->param<bool>("use_vector_pure_pursuit", params_.use_vector_pure_pursuit, false);
 }
 
 ParameterHandler::~ParameterHandler()

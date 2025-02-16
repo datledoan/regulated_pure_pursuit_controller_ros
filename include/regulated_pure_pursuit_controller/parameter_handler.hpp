@@ -49,6 +49,9 @@ struct Parameters
   double max_angular_vel;
   double theta_stopped_vel;
   double trans_stopped_vel;
+  double k;
+  double min_turning_radius;
+  bool use_vector_pure_pursuit;
 };
 
 /**

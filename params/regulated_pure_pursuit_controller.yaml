@@ -4,7 +4,7 @@ RegulatedPurePursuitController:
   min_lookahead_dist: 0.2
   max_lookahead_dist: 0.5
   lookahead_time: 0.8
-  rotate_to_heading_angular_vel: 1.8
+  rotate_to_heading_angular_vel: 0.3
   transform_tolerance: 0.1
   use_velocity_scaled_lookahead_dist: true
   min_approach_linear_velocity: 0.05
@@ -30,3 +30,6 @@ RegulatedPurePursuitController:
   angle_tol: 0.03
   max_linear_vel: 0.3
   max_angular_vel: 0.3
+  k: 5.0
+  min_turning_radius: 0.4
+  use_vector_pure_pursuit: true

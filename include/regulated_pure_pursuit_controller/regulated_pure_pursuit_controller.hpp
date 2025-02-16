@@ -198,6 +198,23 @@ protected:
     return initialized_;
   }
 
+  /**
+   * @brief Calculate the turning radius of the robot given a target point
+   * @param target_pose The target pose to calculate the turning radius
+   * @return The turning radius of the robot
+   */
+  double calcTurningRadius(const geometry_msgs::PoseStamped & target_pose);
+
+  /**
+   * @brief Get the orientation of a vector
+   * @param p1 The first point of the vector
+   * @param p2 The second point of the vector
+   * @return The orientation of the vector
+   */
+  geometry_msgs::Quaternion getOrientation(
+    const geometry_msgs::Point & p1,
+    const geometry_msgs::Point & p2);
+
   std::shared_ptr<ros::NodeHandle> node_;
   std::shared_ptr<ros::NodeHandle> private_node_;
   std::shared_ptr<tf2_ros::Buffer> tf_;
@@ -220,6 +237,7 @@ protected:
   ros::Publisher global_path_pub_;
   ros::Publisher global_path_origin_pub_;
   ros::Publisher carrot_pub_;
+  ros::Publisher vector_pub_;
   ros::Publisher curvature_carrot_pub_;
   ros::Publisher carrot_arc_pub_;
   std::unique_ptr<regulated_pure_pursuit_controller::PathHandler> path_handler_;

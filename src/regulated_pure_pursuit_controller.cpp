@@ -57,6 +57,7 @@ void RegulatedPurePursuitController::initialize(
     global_path_pub_ = private_node_->advertise<nav_msgs::Path>("received_global_plan", 1);
     global_path_origin_pub_ = private_node_->advertise<nav_msgs::Path>("global_plan_origin", 1);
     carrot_pub_ = private_node_->advertise<geometry_msgs::PointStamped>("lookahead_point", 1);
+    vector_pub_ = private_node_->advertise<geometry_msgs::PoseStamped>("lookahead_vector", 1);
     curvature_carrot_pub_ = private_node_->advertise<geometry_msgs::PointStamped>(
       "curvature_lookahead_point", 1);
     
@@ -110,6 +111,53 @@ double calculateCurvature(geometry_msgs::Point lookahead_point)
   } else {
     return 0.0;
   }
+}
+
+double RegulatedPurePursuitController::calcTurningRadius(const geometry_msgs::PoseStamped & target_pose)
+{
+  // Calculate angle to lookahead point
+  double target_angle = angles::normalize_angle(tf2::getYaw(target_pose.pose.orientation));
+  double distance = std::hypot(target_pose.pose.position.x, target_pose.pose.position.y);
+  // Compute turning radius (screw center)
+  double turning_radius;
+  if (params_->allow_reversing || target_pose.pose.position.x >= 0.0) {
+    if (std::abs(target_pose.pose.position.y) > 1e-6) {
+      double phi_1 = std::atan2(
+        (2 * std::pow(target_pose.pose.position.y, 2) - std::pow(distance, 2)),
+        (2 * target_pose.pose.position.x * target_pose.pose.position.y));
+      double phi_2 = std::atan2(std::pow(distance, 2), (2 * target_pose.pose.position.y));
+      double phi = angles::normalize_angle(phi_1 - phi_2);
+      double term_1 = (params_->k * phi) / (((params_->k - 1) * phi) + target_angle);
+      double term_2 = std::pow(distance, 2) / (2 * target_pose.pose.position.y);
+      turning_radius = std::abs(term_1 * term_2);
+    } else {
+      // Handle case when target is directly ahead
+      turning_radius = std::numeric_limits<double>::max();
+    }
+  } else {
+    // If lookahead point is behind the robot, set turning radius to minimum
+    turning_radius = params_->min_turning_radius;
+  }
+
+  // Limit turning radius to avoid extremely sharp turns
+  turning_radius = std::max(turning_radius, params_->min_turning_radius);
+  if (target_pose.pose.position.y < 0) {
+    turning_radius *= -1;
+  }
+  return turning_radius;
+}
+
+geometry_msgs::Quaternion RegulatedPurePursuitController::getOrientation(
+  const geometry_msgs::Point & p1,
+  const geometry_msgs::Point & p2)
+{
+  tf2::Quaternion tf2_quat;
+
+  double yaw = std::atan2(p2.y - p1.y, p2.x - p1.x);
+  tf2_quat.setRPY(0.0, 0.0, yaw);
+  geometry_msgs::Quaternion quat_msg = tf2::toMsg(tf2_quat);
+
+  return quat_msg;
 }
 
 void RegulatedPurePursuitController::getRobotVel(geometry_msgs::Twist& speed){
@@ -217,19 +265,40 @@ uint32_t RegulatedPurePursuitController::computeVelocityCommands(const geometry_
   // Get the particular point on the path at the lookahead distance
   auto carrot_pose = getLookAheadPoint(lookahead_dist, transformed_plan);
   auto rotate_to_path_carrot_pose = carrot_pose;
-  carrot_pub_.publish(createCarrotMsg(carrot_pose));
+  if(params_->use_vector_pure_pursuit){
+    vector_pub_.publish(carrot_pose);
+  }
+  else{
+    carrot_pub_.publish(createCarrotMsg(carrot_pose));
+  }
 
   double linear_vel, angular_vel;
-
-  double lookahead_curvature = calculateCurvature(carrot_pose.pose.position);
-
+  double lookahead_curvature;
+  if(params_->use_vector_pure_pursuit){
+    // Implement vector pure pursuit
+    double turning_radius = calcTurningRadius(carrot_pose);
+    lookahead_curvature = 1.0 / turning_radius;
+  }
+  else{
+    lookahead_curvature = calculateCurvature(carrot_pose.pose.position);
+  }
+  
   double regulation_curvature = lookahead_curvature;
   if (params_->use_fixed_curvature_lookahead) {
     auto curvature_lookahead_pose = getLookAheadPoint(
       params_->curvature_lookahead_dist,
       transformed_plan, params_->interpolate_curvature_after_goal);
     rotate_to_path_carrot_pose = curvature_lookahead_pose;
-    regulation_curvature = calculateCurvature(curvature_lookahead_pose.pose.position);
+    
+    if(params_->use_vector_pure_pursuit){
+      // Implement vector pure pursuit
+      double turning_radius = calcTurningRadius(curvature_lookahead_pose);
+      regulation_curvature = 1.0 / turning_radius;
+    }
+    else{
+      regulation_curvature = calculateCurvature(curvature_lookahead_pose.pose.position);
+    }
+
     curvature_carrot_pub_.publish(createCarrotMsg(curvature_lookahead_pose));
   }
 
@@ -376,6 +445,8 @@ geometry_msgs::PoseStamped RegulatedPurePursuitController::getLookAheadPoint(
     transformed_plan.poses.begin(), transformed_plan.poses.end(), [&](const auto & ps) {
       return hypot(ps.pose.position.x, ps.pose.position.y) >= lookahead_dist;
     });
+  
+  geometry_msgs::PoseStamped pose;
 
   // If the no pose is not far enough, take the last pose
   if (goal_pose_it == transformed_plan.poses.end()) {
@@ -398,14 +469,21 @@ geometry_msgs::PoseStamped RegulatedPurePursuitController::getLookAheadPoint(
       const auto interpolated_position = circleSegmentIntersection(
         last_pose_it->pose.position, projected_position, lookahead_dist);
 
-      geometry_msgs::PoseStamped interpolated_pose;
-      interpolated_pose.header = last_pose_it->header;
-      interpolated_pose.pose.position = interpolated_position;
-      return interpolated_pose;
+      pose.header = last_pose_it->header;
+      pose.pose.position = interpolated_position;
+      pose.pose.orientation = getOrientation(
+        last_pose_it->pose.position, interpolated_position);
     } else {
       goal_pose_it = std::prev(transformed_plan.poses.end());
+      pose = *(goal_pose_it);
+      pose.pose.orientation = getOrientation(
+        std::prev(goal_pose_it)->pose.position, goal_pose_it->pose.position);
     }
-  } else if (goal_pose_it != transformed_plan.poses.begin()) {
+  } else if (goal_pose_it == transformed_plan.poses.begin()) {
+    pose = *(goal_pose_it); 
+    pose.pose.orientation = getOrientation(
+      goal_pose_it->pose.position, std::next(goal_pose_it)->pose.position);
+  } else{
     // Find the point on the line segment between the two poses
     // that is exactly the lookahead distance away from the robot pose (the origin)
     // This can be found with a closed form for the intersection of a segment and a circle
@@ -415,14 +493,13 @@ geometry_msgs::PoseStamped RegulatedPurePursuitController::getLookAheadPoint(
     auto point = circleSegmentIntersection(
       prev_pose_it->pose.position,
       goal_pose_it->pose.position, lookahead_dist);
-    geometry_msgs::PoseStamped pose;
     pose.header.frame_id = prev_pose_it->header.frame_id;
     pose.header.stamp = goal_pose_it->header.stamp;
     pose.pose.position = point;
-    return pose;
+    pose.pose.orientation = getOrientation(prev_pose_it->pose.position, point);
   }
 
-  return *goal_pose_it;
+  return pose;
 }
 
 void RegulatedPurePursuitController::applyConstraints(
