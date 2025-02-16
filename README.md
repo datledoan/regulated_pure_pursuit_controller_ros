@@ -18,6 +18,10 @@ Implement [vector_pure_pursuit](https://github.com/blackcoffeerobotics/vector_pu
 * See its [Configuration Guide Page](https://docs.nav2.org/configuration/packages/configuring-regulated-pp.html)
 
 # Demo
+
+https://github.com/user-attachments/assets/12fc6db3-852a-41f5-ba8a-dff95c00e0d3
+
+
 https://github.com/user-attachments/assets/ad69bfca-6a1c-4576-814b-242fe073b841
 
 # Reference
