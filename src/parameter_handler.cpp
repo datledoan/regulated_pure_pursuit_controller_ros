@@ -44,6 +44,7 @@ ParameterHandler::ParameterHandler(
   private_node_->param<double>("curvature_lookahead_dist", params_.curvature_lookahead_dist, 0.5);
   private_node_->param<bool>("use_rotate_to_heading", params_.use_rotate_to_heading, false);
   private_node_->param<double>("max_angular_accel", params_.max_angular_accel, 0.5);
+  private_node_->param<double>("max_linear_accel", params_.max_linear_accel, 0.5);
   private_node_->param<double>("rotate_to_heading_min_angle", params_.rotate_to_heading_min_angle, 0.1);
   private_node_->param<bool>("allow_reversing", params_.allow_reversing, false);
   private_node_->param<double>("max_robot_pose_search_dist", params_.max_robot_pose_search_dist, 1.0);

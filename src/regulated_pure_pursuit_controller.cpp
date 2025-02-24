@@ -503,10 +503,10 @@ geometry_msgs::PoseStamped RegulatedPurePursuitController::getLookAheadPoint(
 }
 
 void RegulatedPurePursuitController::applyConstraints(
-  const double & curvature, const geometry_msgs::Twist & /*curr_speed*/,
+  const double & curvature, const geometry_msgs::Twist & curr_speed,
   const double & pose_cost, const nav_msgs::Path & path, double & linear_vel, double & sign)
 {
-  double curvature_vel = linear_vel, cost_vel = linear_vel;
+  double curvature_vel = linear_vel, cost_vel = linear_vel, smooth_vel = linear_vel;
 
   // limit the linear velocity by curvature
   if (params_->use_regulated_linear_velocity_scaling) {
@@ -519,8 +519,10 @@ void RegulatedPurePursuitController::applyConstraints(
     cost_vel = heuristics::costConstraint(linear_vel, pose_cost, costmap_ros_, params_);
   }
 
+  smooth_vel = std::abs(curr_speed.linear.x) + params_->max_linear_accel * control_duration_;
+
   // Use the lowest of the 2 constraints, but above the minimum translational speed
-  linear_vel = std::min(cost_vel, curvature_vel);
+  linear_vel = std::min({cost_vel, curvature_vel, smooth_vel});
   linear_vel = std::max(linear_vel, params_->regulated_linear_scaling_min_speed);
 
   // Apply constraint to reduce speed on approach to the final goal pose

@@ -1,12 +1,12 @@
 RegulatedPurePursuitController:
-  desired_linear_vel: 0.5
-  lookahead_dist: 0.3
-  min_lookahead_dist: 0.2
-  max_lookahead_dist: 0.5
-  lookahead_time: 0.8
+  desired_linear_vel: 0.3
+  lookahead_dist: 0.5
+  min_lookahead_dist: 0.3
+  max_lookahead_dist: 0.7
+  lookahead_time: 1.5
   rotate_to_heading_angular_vel: 0.3
   transform_tolerance: 0.1
-  use_velocity_scaled_lookahead_dist: true
+  use_velocity_scaled_lookahead_dist: false
   min_approach_linear_velocity: 0.05
   approach_velocity_scaling_dist: 0.6
   use_collision_detection: true
@@ -14,22 +14,21 @@ RegulatedPurePursuitController:
   use_regulated_linear_velocity_scaling: true
   use_fixed_curvature_lookahead: false
   curvature_lookahead_dist: 0.25
-  use_cost_regulated_linear_velocity_scaling: false
+  use_cost_regulated_linear_velocity_scaling: true
   regulated_linear_scaling_min_radius: 0.9
   regulated_linear_scaling_min_speed: 0.25
   use_rotate_to_heading: true
   allow_reversing: false
-  rotate_to_heading_min_angle: 0.2
-  max_angular_accel: 3.2
+  rotate_to_heading_min_angle: 0.5
+  max_angular_accel: 3.0
+  max_liner_accel: 2.0
   max_robot_pose_search_dist: 10.0
-  max_linear_vel: 0.5
-  max_angular_vel: 0.3
-  theta_stopped_vel: 0.03
+  theta_stopped_vel: 1.0
   trans_stopped_vel: 0.02
   goal_dist_tol: 0.03
   angle_tol: 0.03
   max_linear_vel: 0.3
   max_angular_vel: 0.3
-  k: 5.0
-  min_turning_radius: 0.4
-  use_vector_pure_pursuit: true
+  k: 6.0
+  min_turning_radius: 0.2
+  use_vector_pure_pursuit: false
