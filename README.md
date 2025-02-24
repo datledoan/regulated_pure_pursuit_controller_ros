@@ -21,7 +21,8 @@ Implement [vector_pure_pursuit](https://github.com/blackcoffeerobotics/vector_pu
 
 |   regulated_pure_pursuit  |   vector_pure_pursuit |
 | --- | --- |
-| <video src="https://github.com/user-attachments/assets/12fc6db3-852a-41f5-ba8a-dff95c00e0d3">  | <video src="https://github.com/user-attachments/assets/ad69bfca-6a1c-4576-814b-242fe073b841">  |
+| <video src="https://github.com/user-attachments/assets/71be3f36-5989-4482-b1c1-40f238029b19">  | <video src="https://github.com/user-attachments/assets/9df01c08-a293-4bc1-8be3-a28a0d35eb7e">  |
+
 # Reference
 - [nav2_regulated_pure_pursuit_controller](https://github.com/ros-navigation/navigation2/tree/main/nav2_regulated_pure_pursuit_controller)
 - [regulated_pure_pursuit_controller](https://github.com/JohnTGZ/regulated_pure_pursuit_controller)
