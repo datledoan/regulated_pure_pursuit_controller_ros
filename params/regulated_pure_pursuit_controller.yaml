@@ -20,8 +20,8 @@ RegulatedPurePursuitController:
   use_rotate_to_heading: true
   allow_reversing: false
   rotate_to_heading_min_angle: 0.5
-  max_angular_accel: 3.0
-  max_liner_accel: 2.0
+  max_angular_accel: 0.3
+  max_linear_accel: 2.0
   max_robot_pose_search_dist: 10.0
   theta_stopped_vel: 1.0
   trans_stopped_vel: 0.02
@@ -29,6 +29,10 @@ RegulatedPurePursuitController:
   angle_tol: 0.03
   max_linear_vel: 0.3
   max_angular_vel: 0.3
+  cost_scaling_dist: 0.5
+  cost_scaling_gain: 1.0
+  inflation_cost_scaling_factor: 3.0
+  interpolate_curvature_after_goal: false
   k: 6.0
   min_turning_radius: 0.2
   use_vector_pure_pursuit: false

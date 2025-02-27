@@ -15,7 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   roscpp
   tf
+  dynamic_reconfigure
 )
+
+generate_dynamic_reconfigure_options(cfg/RegulatedPurePursuit.cfg)
 
 include_directories(
         include
@@ -38,6 +41,7 @@ catkin_package(
   pluginlib
   roscpp
   tf
+  dynamic_reconfigure
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -45,6 +49,8 @@ add_library(${PROJECT_NAME} SHARED
   src/collision_checker.cpp
   src/parameter_handler.cpp
   src/path_handler.cpp)
+  
+  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
   target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

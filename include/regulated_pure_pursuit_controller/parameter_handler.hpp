@@ -10,6 +10,8 @@
 #include <ros/ros.h>
 #include <base_local_planner/odometry_helper_ros.h>
 #include "regulated_pure_pursuit_controller/geometry_utils.h"
+#include <dynamic_reconfigure/server.h>
+#include "regulated_pure_pursuit_controller/RegulatedPurePursuitConfig.h"
 
 namespace regulated_pure_pursuit_controller
 {
@@ -86,12 +88,12 @@ protected:
    * @brief Callback executed when a parameter change is detected
    * @param event ParameterEvent message
    */
-  // void dynamicParametersCallback(const RegulatedPurePursuitConfig& cfg, uint32_t level); TODO
+  void dynamicParametersCallback(const RegulatedPurePursuitConfig& cfg, uint32_t level);
   
 
-  // Dynamic parameters handler
   std::mutex mutex_;
-  // std::shared_ptr<DynamicReconfigure> dyn_params_handler_;
+  std::shared_ptr< dynamic_reconfigure::Server<RegulatedPurePursuitConfig> > dynamic_recfg_server_;
+  dynamic_reconfigure::Server<RegulatedPurePursuitConfig>::CallbackType dynamic_recfg_callback_;
   Parameters params_;
 };
 
