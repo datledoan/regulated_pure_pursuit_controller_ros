@@ -1,0 +1,47 @@
+name: ROS CI
+
+on:
+  push:
+    branches:
+      - '**' 
+  pull_request:
+    branches:
+      - '**' 
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [noetic]
+    container:
+      image: osrf/ros:${{ matrix.ros_distro }}-desktop-full
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y python3-catkin-tools python3-rosdep python3-wstool
+        rosdep update
+        
+    # Create workspace and clone the repository
+    - name: Create workspace
+      run: |
+        mkdir -p /ros_ws/src
+        cp -r $GITHUB_WORKSPACE /ros_ws/src/
+        
+    # Install project dependencies
+    - name: Install project dependencies
+      working-directory: /ros_ws
+      run: |
+        rosdep install --from-paths src --ignore-src -r -y
+        
+    # Build packages
+    - name: Build
+      working-directory: /ros_ws
+      shell: bash
+      run: |
+        source /opt/ros/${{ matrix.ros_distro }}/setup.bash
+        catkin build 
