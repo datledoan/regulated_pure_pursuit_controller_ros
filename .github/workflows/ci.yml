@@ -36,7 +36,7 @@ jobs:
     - name: Install project dependencies
       working-directory: /ros_ws
       run: |
-        rosdep install --from-paths src --ignore-src -r -y
+        apt-get install -y ros-${{ matrix.ros_distro }}-dynamic-reconfigure ros-${{ matrix.ros_distro }}-base-local-planner ros-${{ matrix.ros_distro }}-mbf-costmap-nav
         
     # Build packages
     - name: Build
